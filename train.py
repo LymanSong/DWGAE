@@ -14,7 +14,6 @@ import geopandas as gpd
 from tqdm import tqdm
 import argparse
 import time
-
 from dgl import DGLGraph
 from torch.utils.data import DataLoader
 
@@ -28,6 +27,7 @@ parser.add_argument('--gnn_model', type=str, default ='dwgnn', choices = ['gcn',
 parser.add_argument('--aggregator_type', type=str, default='lstm', choices=["lstm", "mean", "max", "sum"], help='an aggregator function for GNN model')
 parser.add_argument('--device', type=int, default=0, help='which gpu to use if any (default: 0)')
 parser.add_argument('--lr', type=float, default=1e-3, help='Adam learning rate')
+parser.add_argument('--edge_func', type = str, default='softmax', choices = ['softmax', 'softmin'], help='normalization function to use during calculating neighbor attention weight vector')
 args = parser.parse_args()
 scaler = preprocessing.StandardScaler()
 
@@ -160,13 +160,15 @@ def train(g, df_node_features, df_edge_features, hidden_dims, \
     
     return result, model, losses, session_record
 
-# gcn
-# hidden_dims = [64, 128, 64, 16, 8, 3] # loss ~= 1.01 for 2000 iterations
-# hidden_dims = [32, 64, 32, 16, 8] # loss ~= 0.895 for 2000 iterations
+'''
+gcn
+hidden_dims = [64, 128, 64, 16, 8, 3] # loss ~= 1.01 for 2000 iterations
+hidden_dims = [32, 64, 32, 16, 8] # loss ~= 0.895 for 2000 iterations
 
-# dwgnn
-# hidden_dims = [64, 128, 64, 16, 8, 3] # loss ~= 0.92 for 2000 iterations
-# hidden_dims = [32, 64, 32, 16, 8] # loss ~= 0.849 for 2000 iterations
+dwgnn
+hidden_dims = [64, 128, 64, 16, 8, 3] # loss ~= 0.91 for 2000 iterations
+hidden_dims = [32, 64, 32, 16, 8] # loss ~= 0.835 for 2000 iterations
+'''
 
 hidden_dims = [32, 64, 32, 16, 8] 
 session_record = '\nhidden_dims : {}\n'.format(hidden_dims)
@@ -179,8 +181,12 @@ if args.gnn_model == 'gcn':
                                                   hidden_dims, args.gnn_model, args.n_epochs, args.lr, session_record = session_record)
     s_filename = os.path.join(time.ctime().replace(':', ';') + '_' + args.dataset + '_' + args.gnn_model + '.txt')
 elif args.gnn_model == 'dwgnn':
+    if args.edge_func == 'softmax':
+        e_func = nn.Softmax(dim = 1)
+    else:
+        e_func = nn.Softmin(dim = 1)
     result, model, losses, session_record = train(g, df_node_features, df_edge_features, hidden_dims, args.gnn_model,\
-                                                  args.n_epochs, args.lr, e_func = nn.Softmax(dim = 1), e_feature = edge_attrs[0], session_record = session_record)
+                                                  args.n_epochs, args.lr, e_func = e_func, e_feature = edge_attrs[0], session_record = session_record)
     s_filename = os.path.join(time.ctime().replace(':', ';') + '_' + args.dataset + '_' + args.gnn_model + '_' + args.aggregator_type + '.txt')
 
 with open(os.path.join(summary_path, s_filename), 'w') as f:

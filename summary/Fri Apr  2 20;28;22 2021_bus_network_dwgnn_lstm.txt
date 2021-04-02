@@ -1,0 +1,21 @@
+----------------- Options ---------------
+          aggregator_type: lstm                          
+                  dataset: bus_network                   
+                   device: 0                             
+                gnn_model: dwgnn                         
+                   in_dim: 10                            
+                       lr: 0.001                         
+                 n_epochs: 2000                          
+----------------- End -------------------
+hidden_dims : [32, 64, 32, 16, 8]
+Epoch: 00 | Loss: 48.10060
+Epoch: 200 | Loss: 0.90636
+Epoch: 400 | Loss: 0.87617
+Epoch: 600 | Loss: 0.86439
+Epoch: 800 | Loss: 0.85647
+Epoch: 1000 | Loss: 0.84713
+Epoch: 1200 | Loss: 0.84448
+Epoch: 1400 | Loss: 0.84547
+Epoch: 1600 | Loss: 0.84494
+Epoch: 1800 | Loss: 0.83464
+Epoch: 1999 | Loss: 0.83563
