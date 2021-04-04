@@ -1,2 +1,4 @@
 # DWGAE
-A PyTorch-DGL implementation of Distance-weighted Graph Auto-encoder (DWGAE)
+A PyTorch-DGL implementation of Distance-Weighted Graph Auto-Encoder (DWGAE)
+
+
