@@ -27,7 +27,7 @@ parser.add_argument('--gnn_model', type=str, default ='dwgnn', choices = ['gcn',
 parser.add_argument('--aggregator_type', type=str, default='lstm', choices=["lstm", "mean", "max", "sum"], help='an aggregator function for GNN model')
 parser.add_argument('--device', type=int, default=0, help='which gpu to use if any (default: 0)')
 parser.add_argument('--lr', type=float, default=1e-3, help='Adam learning rate')
-parser.add_argument('--edge_func', type = str, default='softmax', choices = ['softmax', 'softmin'], help='normalization function to use during calculating neighbor attention weight vector')
+parser.add_argument('--edge_func', type = str, default='softmin', choices = ['softmax', 'softmin'], help='normalization function to use during calculating neighbor attention weight vector')
 args = parser.parse_args()
 scaler = preprocessing.StandardScaler()
 
@@ -166,11 +166,11 @@ hidden_dims = [64, 128, 64, 16, 8, 3] # loss ~= 1.01 for 2000 iterations
 hidden_dims = [32, 64, 32, 16, 8] # loss ~= 0.895 for 2000 iterations
 
 dwgnn
-hidden_dims = [64, 128, 64, 16, 8, 3] # loss ~= 0.91 for 2000 iterations
-hidden_dims = [32, 64, 32, 16, 8] # loss ~= 0.835 for 2000 iterations
+hidden_dims = [64, 128, 64, 16, 8, 3] # loss ~= 0.9 (softmin), 0.91 (softmax) for 2000 iterations
+hidden_dims = [32, 64, 32, 16, 8] # loss ~= 0.835 (softmax), 0.84 (softmin) for 2000 iterations
 '''
 
-hidden_dims = [32, 64, 32, 16, 8] 
+hidden_dims = [32, 64, 32, 16, 8, 3] 
 session_record = '\nhidden_dims : {}\n'.format(hidden_dims)
 arguments_str = print_options(args)
 
@@ -194,6 +194,6 @@ with open(os.path.join(summary_path, s_filename), 'w') as f:
     f.write(session_record)
 
 
-
-
+edge_weight_vec = torch.FloatTensor(scaler.fit_transform(g.edata[edge_attrs[0]].numpy().reshape(-1, 1)))
+model.encode(g, df_node_features, edge_weight_vec)
 

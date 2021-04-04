@@ -27,7 +27,7 @@ class EWConv(nn.Module):
     def udf_u_mul_e(self, nodes):
         m = self.edge_func
         weights = nodes.mailbox['edge_features']
-        weights = torch.div(weights.squeeze(dim = 2), weights.sum(1)).unsqueeze(dim = 2)
+        # weights = torch.div(weights.squeeze(dim = 2), weights.sum(1)).unsqueeze(dim = 2)
         # soft_ed = m(weights)
         soft_ed = m(torch.FloatTensor(np.squeeze(np.apply_along_axis(scaling, 1, weights.numpy()), axis = 2)))
         # num_edges = nodes.mailbox['edge_features'].shape[1]
@@ -80,9 +80,9 @@ class GAE_DWGNN(nn.Module):
         adj_rec = self.decoder(h)
         return adj_rec
 
-    def encode(self, g, edge_features):
-        h = g.ndata['h']
+    def encode(self, g, features, edge_features):
+        h = features
         e = edge_features
         for conv in self.layers:
-            h = F.relu(conv(g, h, e))
+            h = conv(g, h, e)
         return h
